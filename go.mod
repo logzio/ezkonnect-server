@@ -1,4 +1,4 @@
-module github.com/logzio/ezkonnect-backend
+module github.com/logzio/ezkonnect-server
 
 go 1.19
 
