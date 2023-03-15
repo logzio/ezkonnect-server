@@ -1,8 +1,9 @@
 module github.com/logzio/ezkonnect-server
 
-go 1.19
+go 1.18
 
 require (
+	github.com/gorilla/mux v1.8.0
 	k8s.io/apimachinery v0.26.2
 	k8s.io/client-go v0.26.2
 )
