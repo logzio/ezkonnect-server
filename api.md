@@ -4,7 +4,7 @@ This endpoint retrieves information about instrumented applications in the form 
 
 ### Request
 - Method: `GET`
-- Path: `/api/v1/instrumentedapplications`
+- Path: `/api/v1/state`
 
 ### Response
 ### Success
@@ -92,7 +92,7 @@ This endpoint allows you to update annotations for Kubernetes deployments and st
 
 ### Request
 - Method: `POST`
-- Path: `/api/v1/resources`
+- Path: `/api/v1/anotate`
 
 #### Request Body
 The request body should be a JSON array of objects, where each object contains the following fields:
