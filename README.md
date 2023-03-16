@@ -1,1 +1,1 @@
-# ezkonnect-backend
+# Ezkonnect-server
