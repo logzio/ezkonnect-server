@@ -101,6 +101,9 @@ func UpdateResourceAnnotations(w http.ResponseWriter, r *http.Request) {
 			}
 
 			for k, v := range annotations {
+				if deployment.Spec.Template.ObjectMeta.Annotations == nil {
+					deployment.Spec.Template.ObjectMeta.Annotations = make(map[string]string)
+				}
 				deployment.Spec.Template.ObjectMeta.Annotations[k] = v
 			}
 
@@ -120,6 +123,9 @@ func UpdateResourceAnnotations(w http.ResponseWriter, r *http.Request) {
 			}
 
 			for k, v := range annotations {
+				if statefulSet.Spec.Template.ObjectMeta.Annotations == nil {
+					statefulSet.Spec.Template.ObjectMeta.Annotations = make(map[string]string)
+				}
 				statefulSet.Spec.Template.ObjectMeta.Annotations[k] = v
 			}
 
