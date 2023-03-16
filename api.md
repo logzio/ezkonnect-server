@@ -1,5 +1,5 @@
 ## API Documentation
-### Get the state Instrumented Applications `[GET] /api/v1/state`
+- ### `[GET] /api/v1/state` Get the state Instrumented Applications 
 This endpoint retrieves information about instrumented applications in the form of custom resources of type InstrumentedApplication.
 
 ### Request
@@ -87,7 +87,7 @@ Example error response:
 ```
 
 
-### Update Resource Annotations `[POST] /api/v1/anotate`
+- ### `[POST] /api/v1/anotate` Update Resource Annotations 
 This endpoint allows you to update annotations for Kubernetes deployments and statefulsets. The annotations can be used to enable or disable telemetry features such as metrics and traces.
 
 ### Request
