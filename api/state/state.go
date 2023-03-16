@@ -17,13 +17,13 @@ import (
 )
 
 type InstrumentdApplicationData struct {
-	Name           string `json:"name"`
-	Namespace      string `json:"namespace"`
-	ControllerKind string `json:"controller_kind"`
-	ContainerName  string `json:"container_name"`
-	Instrumented   bool   `json:"instrumented"`
-	Application    string `json:"application"`
-	Language       string `json:"language"`
+	Name           string  `json:"name"`
+	Namespace      string  `json:"namespace"`
+	ControllerKind string  `json:"controller_kind"`
+	ContainerName  string  `json:"container_name"`
+	Instrumented   bool    `json:"instrumented"`
+	Application    *string `json:"application"`
+	Language       *string `json:"language"`
 }
 
 // GetCustomResourcesHandler lists all custom resources of type InstrumentedApplication
@@ -64,13 +64,14 @@ func GetCustomResourcesHandler(w http.ResponseWriter, r *http.Request) {
 		if langOk {
 			// Handle the languages field
 			for _, language := range languages {
+				langStr := language.(map[string]interface{})["language"].(string)
 				entry := InstrumentdApplicationData{
 					Name:           name,
 					Namespace:      namespace,
 					ControllerKind: ControllerKind,
 					Instrumented:   status.(map[string]interface{})["instrumented"].(bool),
 					ContainerName:  language.(map[string]interface{})["containerName"].(string),
-					Language:       language.(map[string]interface{})["language"].(string),
+					Language:       &langStr,
 				}
 				data = append(data, entry)
 			}
@@ -80,13 +81,14 @@ func GetCustomResourcesHandler(w http.ResponseWriter, r *http.Request) {
 		// Handle the applications field
 		if appOk {
 			for _, application := range applications {
+				applicationStr := application.(map[string]interface{})["application"].(string)
 				entry := InstrumentdApplicationData{
 					Name:           name,
 					Namespace:      namespace,
 					ControllerKind: ControllerKind,
 					Instrumented:   status.(map[string]interface{})["instrumented"].(bool),
 					ContainerName:  application.(map[string]interface{})["containerName"].(string),
-					Application:    application.(map[string]interface{})["application"].(string),
+					Application:    &applicationStr,
 				}
 				data = append(data, entry)
 			}
