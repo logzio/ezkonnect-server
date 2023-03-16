@@ -1,9 +1,10 @@
 # Ezkonnect-server
 A web server for Ezkonnect written in go.
-This server is designed to run in a kubernetes environment, However it can run locally as well with a `kubeconfig` file connected to a kubernetes cluster.
+This server is designed to run in a kubernetes environment, However it can run locally as well if a `kubeconfig` file connected to a kubernetes cluster is present on your machine.
 ### getting started
 1. Clone the repo
-2. run `make server-local` to start the server
+2. Run `make server-local` to start the server
+3. Rhe server will be running on `localhost:8080`
 
 ### API
 **Full API docs can be found [Here](./api.md)**
