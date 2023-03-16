@@ -1,1 +1,23 @@
 # Ezkonnect-server
+A web server for Ezkonnect written in go.
+This server is designed to run in a kubernetes environment, However it can run locally as well with a `kubeconfig` file connected to a kubernetes cluster.
+### getting started
+1. Clone the repo
+2. run `make server-local` to start the server
+
+### API
+**Full API docs can be found [Here](./api.md)**
+- Get the state Instrumented Applications `[GET] /api/v1/state`
+
+This endpoint retrieves information about instrumented applications in the form of custom resources of type InstrumentedApplication.
+
+- Update Resource Annotations `[POST] /api/v1/annotate`
+
+This endpoint allows you to update annotations for Kubernetes deployments and statefulsets. The annotations can be used to enable or disable telemetry features such as metrics and traces.
+
+### development
+- run `make server-local` to start the server
+- run `make docker-build` to build the docker image
+- run `make docker-push` to push the docker image to the registry
+- run `deploy-kubectl` to deploy the server to your cluster
+- run `clean-kubectl` to clean the server from your cluster

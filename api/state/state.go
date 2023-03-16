@@ -16,6 +16,15 @@ import (
 	"strings"
 )
 
+// InstrumentdApplicationData is the data structure for the custom resource
+// the response will contain a list of these fields
+// name: the name of the custom resource
+// namespace: the namespace of the custom resource
+// controller_kind: the kind of the controller that created the custom resource
+// container_name: the name of the container
+// instrumented: whether the container is instrumented or not
+// application: the name of the application that the container belongs to
+// language: the language of the application that the container belongs to
 type InstrumentdApplicationData struct {
 	Name           string  `json:"name"`
 	Namespace      string  `json:"namespace"`
