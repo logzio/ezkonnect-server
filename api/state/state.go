@@ -25,11 +25,12 @@ import (
 // instrumented: whether the container is instrumented or not
 // application: the name of the application that the container belongs to
 // language: the language of the application that the container belongs to
+
 type InstrumentdApplicationData struct {
 	Name           string  `json:"name"`
 	Namespace      string  `json:"namespace"`
 	ControllerKind string  `json:"controller_kind"`
-	ContainerName  string  `json:"container_name"`
+	ContainerName  *string `json:"container_name"`
 	Instrumented   bool    `json:"instrumented"`
 	Application    *string `json:"application"`
 	Language       *string `json:"language"`
@@ -74,12 +75,13 @@ func GetCustomResourcesHandler(w http.ResponseWriter, r *http.Request) {
 			// Handle the languages field
 			for _, language := range languages {
 				langStr := language.(map[string]interface{})["language"].(string)
+				containerNameStr := language.(map[string]interface{})["containerName"].(string)
 				entry := InstrumentdApplicationData{
 					Name:           name,
 					Namespace:      namespace,
 					ControllerKind: ControllerKind,
 					Instrumented:   status.(map[string]interface{})["instrumented"].(bool),
-					ContainerName:  language.(map[string]interface{})["containerName"].(string),
+					ContainerName:  &containerNameStr,
 					Language:       &langStr,
 				}
 				data = append(data, entry)
@@ -91,12 +93,13 @@ func GetCustomResourcesHandler(w http.ResponseWriter, r *http.Request) {
 		if appOk {
 			for _, application := range applications {
 				applicationStr := application.(map[string]interface{})["application"].(string)
+				containerNameStr := application.(map[string]interface{})["containerName"].(string)
 				entry := InstrumentdApplicationData{
 					Name:           name,
 					Namespace:      namespace,
 					ControllerKind: ControllerKind,
 					Instrumented:   status.(map[string]interface{})["instrumented"].(bool),
-					ContainerName:  application.(map[string]interface{})["containerName"].(string),
+					ContainerName:  &containerNameStr,
 					Application:    &applicationStr,
 				}
 				data = append(data, entry)
