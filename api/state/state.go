@@ -27,13 +27,14 @@ import (
 // language: the language of the application that the container belongs to
 
 type InstrumentdApplicationData struct {
-	Name           string  `json:"name"`
-	Namespace      string  `json:"namespace"`
-	ControllerKind string  `json:"controller_kind"`
-	ContainerName  *string `json:"container_name"`
-	Instrumented   bool    `json:"instrumented"`
-	Application    *string `json:"application"`
-	Language       *string `json:"language"`
+	Name                string  `json:"name"`
+	Namespace           string  `json:"namespace"`
+	ControllerKind      string  `json:"controller_kind"`
+	ContainerName       *string `json:"container_name"`
+	TracesInstrumented  bool    `json:"traces_instrumented"`
+	MetricsInstrumented bool    `json:"metrics_instrumented"`
+	Application         *string `json:"application"`
+	Language            *string `json:"language"`
 }
 
 // GetCustomResourcesHandler lists all custom resources of type InstrumentedApplication
@@ -77,12 +78,13 @@ func GetCustomResourcesHandler(w http.ResponseWriter, r *http.Request) {
 				langStr := language.(map[string]interface{})["language"].(string)
 				containerNameStr := language.(map[string]interface{})["containerName"].(string)
 				entry := InstrumentdApplicationData{
-					Name:           name,
-					Namespace:      namespace,
-					ControllerKind: ControllerKind,
-					Instrumented:   status.(map[string]interface{})["instrumented"].(bool),
-					ContainerName:  &containerNameStr,
-					Language:       &langStr,
+					Name:                name,
+					Namespace:           namespace,
+					ControllerKind:      ControllerKind,
+					TracesInstrumented:  status.(map[string]interface{})["tracesInstrumented"].(bool),
+					MetricsInstrumented: status.(map[string]interface{})["metricsInstrumented"].(bool),
+					ContainerName:       &containerNameStr,
+					Language:            &langStr,
 				}
 				data = append(data, entry)
 			}
@@ -95,12 +97,13 @@ func GetCustomResourcesHandler(w http.ResponseWriter, r *http.Request) {
 				applicationStr := application.(map[string]interface{})["application"].(string)
 				containerNameStr := application.(map[string]interface{})["containerName"].(string)
 				entry := InstrumentdApplicationData{
-					Name:           name,
-					Namespace:      namespace,
-					ControllerKind: ControllerKind,
-					Instrumented:   status.(map[string]interface{})["instrumented"].(bool),
-					ContainerName:  &containerNameStr,
-					Application:    &applicationStr,
+					Name:                name,
+					Namespace:           namespace,
+					ControllerKind:      ControllerKind,
+					TracesInstrumented:  status.(map[string]interface{})["tracesInstrumented"].(bool),
+					MetricsInstrumented: status.(map[string]interface{})["metricsInstrumented"].(bool),
+					ContainerName:       &containerNameStr,
+					Application:         &applicationStr,
 				}
 				data = append(data, entry)
 			}
@@ -108,10 +111,11 @@ func GetCustomResourcesHandler(w http.ResponseWriter, r *http.Request) {
 		// Handle the case where the languages and applications fields are not present in the spec
 		if !langOk && !appOk {
 			entry := InstrumentdApplicationData{
-				Name:           name,
-				Namespace:      namespace,
-				ControllerKind: ControllerKind,
-				Instrumented:   status.(map[string]interface{})["instrumented"].(bool),
+				Name:                name,
+				Namespace:           namespace,
+				ControllerKind:      ControllerKind,
+				TracesInstrumented:  status.(map[string]interface{})["tracesInstrumented"].(bool),
+				MetricsInstrumented: status.(map[string]interface{})["metricsInstrumented"].(bool),
 			}
 			data = append(data, entry)
 		}

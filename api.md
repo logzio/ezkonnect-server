@@ -16,7 +16,8 @@ The response body will be a JSON array of objects, where each object contains th
 - `namespace` (string): The namespace of the custom resource.
 - `controller_kind` (string): The kind of the controller (lowercased owner reference kind).
 - `container_name` (string, optional): The container name associated with the instrumented application. Will be empty if both language and application fields are empty.
-- `instrumented` (bool): Whether the application is instrumented or not.
+- `traces_instrumented` (bool): Whether the application is instrumented or not.
+- `metrics_instrumented` (bool): Whether the application is exporting metrics or not.
 - `application` (string, optional): The application name if available in the spec.
 - `language` (string, optional): The programming language if available in the spec.
 
@@ -31,7 +32,8 @@ Each instrumented application can have a `language` and/or an `application` fiel
         "namespace": "default",
         "controller_kind": "deployment",
         "container_name": "app-container",
-        "instrumented": true,
+        "traces_instrumented": true,
+        "metrics_instrumented": false,
         "application": null,
         "language": "python"
     },
@@ -40,14 +42,16 @@ Each instrumented application can have a `language` and/or an `application` fiel
         "namespace": "default",
         "controller_kind": "deployment",
         "container_name": "",
-        "instrumented": false
+        "traces_instrumented": false,
+        "metrics_instrumented": false
     },
     {
         "name": "statefulset-with-app-detection",
         "namespace": "default",
         "controller_kind": "statefulset",
         "container_name": "app-container",
-        "instrumented": false,
+        "traces_instrumented": false,
+        "metrics_instrumented": false,
         "application": "my-app",
         "language": null
     },
@@ -56,7 +60,8 @@ Each instrumented application can have a `language` and/or an `application` fiel
         "namespace": "default",
         "controller_kind": "deployment",
         "container_name": "app-container",
-        "instrumented": false,
+        "traces_instrumented": false,
+        "metrics_instrumented": false,
         "application": null,
         "language": "java"
     }
