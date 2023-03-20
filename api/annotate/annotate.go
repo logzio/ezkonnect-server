@@ -71,13 +71,13 @@ func UpdateResourceAnnotations(w http.ResponseWriter, r *http.Request) {
 		// choose the annotation key and value according to the telemetry type and action
 		var annotationKey string
 		if resource.TelemetryType == "metrics" {
-			annotationKey = "logz.io/export-metrics"
+			annotationKey = "logz.io/metrics_instrument"
 		} else {
-			annotationKey = "logz.io/instrument"
+			annotationKey = "logz.io/traces_instrument"
 		}
 		value := "true"
 		if resource.Action == "delete" {
-			value = "false"
+			value = "rollback"
 		}
 
 		annotations := map[string]string{

@@ -154,7 +154,7 @@ The response body will be a JSON array of objects, where each object contains th
         "namespace": "default",
         "kind": "statefulset",
         "updated_annotations": {
-            "logz.io/instrument": "false"
+            "logz.io/instrument": "rollback"
         }
     }
 ]
