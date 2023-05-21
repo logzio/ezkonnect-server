@@ -15,7 +15,8 @@ import (
 func main() {
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/api/v1/state", stateapi.GetCustomResourcesHandler).Methods(http.MethodGet)
-	router.HandleFunc("/api/v1/annotate", annotateapi.UpdateResourceAnnotations).Methods(http.MethodPost)
+	router.HandleFunc("/api/v1/annotate/traces", annotateapi.UpdateTracesResourceAnnotations).Methods(http.MethodPost)
+	router.HandleFunc("/api/v1/annotate/logs", annotateapi.UpdateLogsResourceAnnotations).Methods(http.MethodPost)
 	fmt.Println("Starting server on :8080")
 	log.Fatal(http.ListenAndServe(":8080", router))
 }
