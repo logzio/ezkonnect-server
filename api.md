@@ -92,12 +92,12 @@ Example error response:
 ```
 
 
-- ### `[POST] /api/v1/anotate` Update Resource Annotations 
+- ### `[POST] /api/v1/anotate/traces` Update traces Resource Annotations 
 This endpoint allows you to update annotations for Kubernetes deployments and statefulsets. The annotations can be used to enable or disable telemetry features such as metrics and traces.
 
 ### Request
 - Method: `POST`
-- Path: `/api/v1/anotate`
+- Path: `/api/v1/anotate/traces`
 
 #### Request Body
 The request body should be a JSON array of objects, where each object contains the following fields:
@@ -184,3 +184,102 @@ Example error response:
   "error": "Error message"
 }
 ```
+
+
+- ### `[POST] /api/v1/annotate/logs` Update Logs Resource Annotations
+
+
+This endpoint allows you to set the log type for Kubernetes deployments and statefulsets. The annotation is used to determine the type of logs that should be collected from the resource.
+
+### Request
+
+*   Method: `POST`
+*   Path: `/api/v1/annotate/logs`
+
+#### Request Body
+
+The request body should be a JSON array of objects, where each object contains the following fields:
+
+*   `name` (string): The name of the resource.
+*   `controller_kind` (string): The kind of the resource controller, either "deployment" or "statefulset".
+*   `namespace` (string): The namespace of the resource.
+*   `log_type` (string): The type of logs to add.
+
+#### Example Request Body
+
+```json
+[
+    {
+        "name": "my-deployment",
+        "controller_kind": "deployment",
+        "namespace": "default",
+        "log_type": "application"
+    },
+    {
+        "name": "my-statefulset",
+        "controller_kind": "statefulset",
+        "namespace": "default",
+        "log_type": "system"
+    }
+]
+
+```
+
+### Response
+
+#### Success
+
+*   Status code: `200 OK`
+*   Content-Type: `application/json`
+
+The response body will be a JSON array of objects, where each object contains the following fields:
+
+*   `name` (string): The name of the updated resource.
+*   `namespace` (string): The namespace of the updated resource.
+*   `controller_kind` (string): The kind of the updated resource, either "deployment" or "statefulset".
+*   `updated_annotations` (object): The updated annotations with their keys and values.
+
+#### Example Success Response
+
+```json
+[
+    {
+        "name": "my-deployment",
+        "namespace": "default",
+        "controller_kind": "deployment",
+        "updated_annotations": {
+            "logz.io/application_type": "application"
+        }
+    },
+    {
+        "name": "my-statefulset",
+        "namespace": "default",
+        "controller_kind": "statefulset",
+        "updated_annotations": {
+            "logz.io/application_type": "system"
+        }
+    }
+]
+
+```
+#### Errors
+
+*   Status code: `400 Bad Request`
+
+The request body is malformed, or one or more of the provided fields have invalid values.
+
+Example error response:
+
+jsonCopy code
+
+`{ "error": "Invalid input" }`
+
+*   Status code: `500 Internal Server Error`
+
+There was an error processing the request, such as failing to interact with the Kubernetes cluster.
+
+Example error response:
+
+jsonCopy code
+
+`{   "error": "Error message" }`
