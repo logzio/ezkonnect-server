@@ -12,9 +12,13 @@ This server is designed to run in a kubernetes environment, However it can run l
 
 This endpoint retrieves information about instrumented applications in the form of custom resources of type InstrumentedApplication.
 
-- Update Resource Annotations `[POST] /api/v1/annotate`
+- Update traces resource annotations `[POST] /api/v1/annotate/traces`
 
-This endpoint allows you to update annotations for Kubernetes deployments and statefulsets. The annotations can be used to enable or disable telemetry features such as metrics and traces.
+This endpoint allows you to update annotations for Kubernetes deployments and statefulsets. The annotations can be used to enable or disable telemetry features such as traces auto instrumentation.
+
+- Update logs resource annotations `[POST] /api/v1/annotate/logs`
+
+This endpoint allows you to update annotations for Kubernetes deployments and statefulsets. The annotations can be used to log type for your applications.
 
 ### development
 - run `make server-local` to start the server
