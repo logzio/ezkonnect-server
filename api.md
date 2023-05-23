@@ -102,9 +102,8 @@ This endpoint allows you to update annotations for Kubernetes deployments and st
 #### Request Body
 The request body should be a JSON array of objects, where each object contains the following fields:
 - `name` (string): The name of the resource.
-- `kind` (string): The kind of the resource, either deployment or statefulset.
+- `controller_kind` (string): The kind of the resource, either deployment or statefulset.
 - `namespace` (string): The namespace of the resource.
-- `telemetry_type` (string): The type of telemetry, either metrics or traces.
 - `action` (string): The action to perform, either add or delete.
 
 #### Example Request Body
@@ -113,16 +112,14 @@ json
 [
     {
         "name": "my-deployment",
-        "kind": "deployment",
+        "controller_kind": "deployment",
         "namespace": "default",
-        "telemetry_type": "metrics",
         "action": "add"
     },
     {
         "name": "my-statefulset",
-        "kind": "statefulset",
+        "controller_kind": "statefulset",
         "namespace": "default",
-        "telemetry_type": "traces",
         "action": "delete"
     }
 ]
@@ -136,7 +133,7 @@ json
 The response body will be a JSON array of objects, where each object contains the following fields:
 - `name` (string): The name of the updated resource.
 - `namespace` (string): The namespace of the updated resource.
-- `kind` (string): The kind of the updated resource, either deployment or statefulset.
+- `controller_kind` (string): The kind of the updated resource, either deployment or statefulset.
 - `updated_annotations` (object): The updated annotations with their keys and values.
 #### Example Success Response
 ```json
@@ -144,15 +141,15 @@ The response body will be a JSON array of objects, where each object contains th
     {
         "name": "my-deployment",
         "namespace": "default",
-        "kind": "deployment",
+        "controller_kind": "deployment",
         "updated_annotations": {
-            "logz.io/export-metrics": "true"
+            "logz.io/instrument": "true"
         }
     },
     {
         "name": "my-statefulset",
         "namespace": "default",
-        "kind": "statefulset",
+        "controller_kind": "statefulset",
         "updated_annotations": {
             "logz.io/instrument": "rollback"
         }
