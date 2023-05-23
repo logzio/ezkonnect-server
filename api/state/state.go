@@ -25,16 +25,16 @@ import (
 // instrumented: whether the container is instrumented or not
 // application: the name of the application that the container belongs to
 // language: the language of the application that the container belongs to
-
+// log_type: the log type of the application that the container belongs to
 type InstrumentdApplicationData struct {
-	Name                string  `json:"name"`
-	Namespace           string  `json:"namespace"`
-	ControllerKind      string  `json:"controller_kind"`
-	ContainerName       *string `json:"container_name"`
-	TracesInstrumented  bool    `json:"traces_instrumented"`
-	MetricsInstrumented bool    `json:"metrics_instrumented"`
-	Application         *string `json:"application"`
-	Language            *string `json:"language"`
+	Name               string  `json:"name"`
+	Namespace          string  `json:"namespace"`
+	ControllerKind     string  `json:"controller_kind"`
+	ContainerName      *string `json:"container_name"`
+	TracesInstrumented bool    `json:"traces_instrumented"`
+	Application        *string `json:"application"`
+	Language           *string `json:"language"`
+	LogType            *string `json:"log_type"`
 }
 
 // GetCustomResourcesHandler lists all custom resources of type InstrumentedApplication
@@ -70,6 +70,8 @@ func GetCustomResourcesHandler(w http.ResponseWriter, r *http.Request) {
 		ControllerKind := strings.ToLower(item.GetOwnerReferences()[0].Kind)
 		status := item.Object["status"]
 		spec := item.Object["spec"]
+		logType := spec.(map[string]interface{})["logType"].(string)
+
 		// Check if the languages field is present in the spec
 		languages, langOk := spec.(map[string]interface{})["languages"].([]interface{})
 		if langOk {
@@ -78,13 +80,13 @@ func GetCustomResourcesHandler(w http.ResponseWriter, r *http.Request) {
 				langStr := language.(map[string]interface{})["language"].(string)
 				containerNameStr := language.(map[string]interface{})["containerName"].(string)
 				entry := InstrumentdApplicationData{
-					Name:                name,
-					Namespace:           namespace,
-					ControllerKind:      ControllerKind,
-					TracesInstrumented:  status.(map[string]interface{})["tracesInstrumented"].(bool),
-					MetricsInstrumented: status.(map[string]interface{})["metricsInstrumented"].(bool),
-					ContainerName:       &containerNameStr,
-					Language:            &langStr,
+					Name:               name,
+					Namespace:          namespace,
+					ControllerKind:     ControllerKind,
+					TracesInstrumented: status.(map[string]interface{})["tracesInstrumented"].(bool),
+					ContainerName:      &containerNameStr,
+					Language:           &langStr,
+					LogType:            &logType,
 				}
 				data = append(data, entry)
 			}
@@ -97,13 +99,13 @@ func GetCustomResourcesHandler(w http.ResponseWriter, r *http.Request) {
 				applicationStr := application.(map[string]interface{})["application"].(string)
 				containerNameStr := application.(map[string]interface{})["containerName"].(string)
 				entry := InstrumentdApplicationData{
-					Name:                name,
-					Namespace:           namespace,
-					ControllerKind:      ControllerKind,
-					TracesInstrumented:  status.(map[string]interface{})["tracesInstrumented"].(bool),
-					MetricsInstrumented: status.(map[string]interface{})["metricsInstrumented"].(bool),
-					ContainerName:       &containerNameStr,
-					Application:         &applicationStr,
+					Name:               name,
+					Namespace:          namespace,
+					ControllerKind:     ControllerKind,
+					TracesInstrumented: status.(map[string]interface{})["tracesInstrumented"].(bool),
+					ContainerName:      &containerNameStr,
+					Application:        &applicationStr,
+					LogType:            &logType,
 				}
 				data = append(data, entry)
 			}
@@ -111,11 +113,11 @@ func GetCustomResourcesHandler(w http.ResponseWriter, r *http.Request) {
 		// Handle the case where the languages and applications fields are not present in the spec
 		if !langOk && !appOk {
 			entry := InstrumentdApplicationData{
-				Name:                name,
-				Namespace:           namespace,
-				ControllerKind:      ControllerKind,
-				TracesInstrumented:  status.(map[string]interface{})["tracesInstrumented"].(bool),
-				MetricsInstrumented: status.(map[string]interface{})["metricsInstrumented"].(bool),
+				Name:               name,
+				Namespace:          namespace,
+				ControllerKind:     ControllerKind,
+				TracesInstrumented: status.(map[string]interface{})["tracesInstrumented"].(bool),
+				LogType:            &logType,
 			}
 			data = append(data, entry)
 		}
