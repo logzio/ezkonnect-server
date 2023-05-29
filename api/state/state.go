@@ -3,16 +3,12 @@ package state
 import (
 	"context"
 	"encoding/json"
+	"github.com/logzio/ezkonnect-server/api"
+	"go.uber.org/zap"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic"
-	"k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/clientcmd"
-	"k8s.io/client-go/util/homedir"
-	"log"
 	"net/http"
-	"os"
-	"path/filepath"
 	"strings"
 )
 
@@ -34,23 +30,30 @@ type InstrumentdApplicationData struct {
 	TracesInstrumented bool    `json:"traces_instrumented"`
 	Application        *string `json:"application"`
 	Language           *string `json:"language"`
+	DetectionStatus    string  `json:"detection_status"`
 	LogType            *string `json:"log_type"`
 }
 
 // GetCustomResourcesHandler lists all custom resources of type InstrumentedApplication
 func GetCustomResourcesHandler(w http.ResponseWriter, r *http.Request) {
+	logger := api.InitLogger()
+	defer logger.Sync()
 	if r.Method != http.MethodGet {
 		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
 		return
 	}
-	config, err := getConfig()
+	config, err := api.GetConfig()
 	if err != nil {
-		log.Fatalf("Error getting Kubernetes config: %v", err)
+		logger.Error("Error getting Kubernetes config", zap.Error(err))
+		http.Error(w, "Error getting Kubernetes config", http.StatusInternalServerError)
+		return
 	}
 	// Create a dynamic client
 	dynamicClient, err := dynamic.NewForConfig(config)
 	if err != nil {
-		log.Fatalf("Error creating dynamic client: %v", err)
+		logger.Error("Error creating dynamic client", zap.Error(err))
+		http.Error(w, "Error creating dynamic client", http.StatusInternalServerError)
+		return
 	}
 	gvr := schema.GroupVersionResource{
 		Group:    "logz.io",
@@ -60,7 +63,9 @@ func GetCustomResourcesHandler(w http.ResponseWriter, r *http.Request) {
 	// List all custom resources
 	instrumentedApplicationsList, err := dynamicClient.Resource(gvr).Namespace("").List(context.Background(), v1.ListOptions{})
 	if err != nil {
-		log.Fatalf("Error listing custom resources: %v", err)
+		logger.Error("Error listing custom resources", zap.Error(err))
+		http.Error(w, "Error listing custom resources", http.StatusInternalServerError)
+		return
 	}
 	// Build a list of InstrumentdApplicationData from the custom resources
 	var data []InstrumentdApplicationData
@@ -68,12 +73,12 @@ func GetCustomResourcesHandler(w http.ResponseWriter, r *http.Request) {
 		name := item.GetName()
 		namespace := item.GetNamespace()
 		ControllerKind := strings.ToLower(item.GetOwnerReferences()[0].Kind)
-		status := item.Object["status"]
-		spec := item.Object["spec"]
-		logType := spec.(map[string]interface{})["logType"].(string)
+		status := item.Object["status"].(map[string]interface{})
+		spec := item.Object["spec"].(map[string]interface{})
+		logType := spec["logType"].(string)
 
 		// Check if the languages field is present in the spec
-		languages, langOk := spec.(map[string]interface{})["languages"].([]interface{})
+		languages, langOk := spec["languages"].([]interface{})
 		if langOk {
 			// Handle the languages field
 			for _, language := range languages {
@@ -83,16 +88,17 @@ func GetCustomResourcesHandler(w http.ResponseWriter, r *http.Request) {
 					Name:               name,
 					Namespace:          namespace,
 					ControllerKind:     ControllerKind,
-					TracesInstrumented: status.(map[string]interface{})["tracesInstrumented"].(bool),
+					TracesInstrumented: status["tracesInstrumented"].(bool),
 					ContainerName:      &containerNameStr,
 					Language:           &langStr,
+					DetectionStatus:    status["instrumentationDetection"].(map[string]interface{})["phase"].(string),
 					LogType:            &logType,
 				}
 				data = append(data, entry)
 			}
 		}
 		// Check if the applications field is present in the spec
-		applications, appOk := spec.(map[string]interface{})["applications"].([]interface{})
+		applications, appOk := spec["applications"].([]interface{})
 		// Handle the applications field
 		if appOk {
 			for _, application := range applications {
@@ -102,9 +108,10 @@ func GetCustomResourcesHandler(w http.ResponseWriter, r *http.Request) {
 					Name:               name,
 					Namespace:          namespace,
 					ControllerKind:     ControllerKind,
-					TracesInstrumented: status.(map[string]interface{})["tracesInstrumented"].(bool),
+					TracesInstrumented: status["tracesInstrumented"].(bool),
 					ContainerName:      &containerNameStr,
 					Application:        &applicationStr,
+					DetectionStatus:    status["instrumentationDetection"].(map[string]interface{})["phase"].(string),
 					LogType:            &logType,
 				}
 				data = append(data, entry)
@@ -116,31 +123,14 @@ func GetCustomResourcesHandler(w http.ResponseWriter, r *http.Request) {
 				Name:               name,
 				Namespace:          namespace,
 				ControllerKind:     ControllerKind,
-				TracesInstrumented: status.(map[string]interface{})["tracesInstrumented"].(bool),
+				TracesInstrumented: status["tracesInstrumented"].(bool),
+				DetectionStatus:    status["instrumentationDetection"].(map[string]interface{})["phase"].(string),
 				LogType:            &logType,
 			}
 			data = append(data, entry)
 		}
 	}
 	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(data)
-}
-
-func getConfig() (*rest.Config, error) {
-	var config *rest.Config
-
-	kubeconfig := filepath.Join(homedir.HomeDir(), ".kube", "config")
-	if _, err := os.Stat(kubeconfig); err == nil {
-		config, err = clientcmd.BuildConfigFromFlags("", kubeconfig)
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		config, err = rest.InClusterConfig()
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	return config, nil
 }

@@ -2,6 +2,7 @@ package annotate
 
 import (
 	"encoding/json"
+	"github.com/logzio/ezkonnect-server/api"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"net/http"
@@ -34,6 +35,7 @@ type LogsResourceResponse struct {
 }
 
 func UpdateLogsResourceAnnotations(w http.ResponseWriter, r *http.Request) {
+	logger := api.InitLogger()
 	// Decode JSON body
 	var resources []LogsResourceRequest
 	err := json.NewDecoder(r.Body).Decode(&resources)
@@ -43,8 +45,9 @@ func UpdateLogsResourceAnnotations(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get the Kubernetes config
-	config, err := GetConfig()
+	config, err := api.GetConfig()
 	if err != nil {
+		logger.Error("Error getting Kubernetes config", err)
 		http.Error(w, "Error getting Kubernetes config", http.StatusInternalServerError)
 		return
 	}
@@ -58,6 +61,7 @@ func UpdateLogsResourceAnnotations(w http.ResponseWriter, r *http.Request) {
 	for _, resource := range resources {
 		// Validate input
 		if !isValidLogsResourceRequest(resource) {
+			logger.Error("Invalid input", err)
 			http.Error(w, "Invalid input", http.StatusBadRequest)
 			return
 		}
@@ -81,6 +85,7 @@ func UpdateLogsResourceAnnotations(w http.ResponseWriter, r *http.Request) {
 		case "deployment":
 			deployment, err := clientset.AppsV1().Deployments(resource.Namespace).Get(r.Context(), resource.Name, v1.GetOptions{})
 			if err != nil {
+				logger.Error("Error getting deployment", err)
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
@@ -94,6 +99,7 @@ func UpdateLogsResourceAnnotations(w http.ResponseWriter, r *http.Request) {
 
 			_, err = clientset.AppsV1().Deployments(resource.Namespace).Update(r.Context(), deployment, v1.UpdateOptions{})
 			if err != nil {
+				logger.Error("Error updating deployment", err)
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
@@ -103,6 +109,7 @@ func UpdateLogsResourceAnnotations(w http.ResponseWriter, r *http.Request) {
 		case "statefulset":
 			statefulSet, err := clientset.AppsV1().StatefulSets(resource.Namespace).Get(r.Context(), resource.Name, v1.GetOptions{})
 			if err != nil {
+				logger.Error("Error getting statefulset", err)
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
@@ -116,6 +123,7 @@ func UpdateLogsResourceAnnotations(w http.ResponseWriter, r *http.Request) {
 
 			_, err = clientset.AppsV1().StatefulSets(resource.Namespace).Update(r.Context(), statefulSet, v1.UpdateOptions{})
 			if err != nil {
+				logger.Error("Error updating statefulset", err)
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
@@ -131,5 +139,5 @@ func UpdateLogsResourceAnnotations(w http.ResponseWriter, r *http.Request) {
 
 func isValidLogsResourceRequest(req LogsResourceRequest) bool {
 	validKinds := []string{"deployment", "statefulset"}
-	return contains(validKinds, req.Kind)
+	return api.Contains(validKinds, req.Kind)
 }
