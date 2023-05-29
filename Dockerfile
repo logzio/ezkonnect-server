@@ -17,7 +17,7 @@ FROM alpine:3.14
 COPY --from=build /app/main /app/main
 
 # Expose port 8080
-EXPOSE 8080
+EXPOSE 5050
 
 # Start the API server
 CMD ["/app/main"]

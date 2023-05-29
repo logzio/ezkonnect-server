@@ -4,7 +4,7 @@ This server is designed to run in a kubernetes environment, However it can run l
 ### getting started
 1. Clone the repo
 2. Run `make server-local` to start the server
-3. Rhe server will be running on `localhost:8080`
+3. The server will be running on `localhost:5050`
 
 ### API
 **Full API docs can be found [Here](./api.md)**
@@ -18,11 +18,11 @@ This endpoint allows you to update annotations for Kubernetes deployments and st
 
 - Update logs resource annotations `[POST] /api/v1/annotate/logs`
 
-This endpoint allows you to update annotations for Kubernetes deployments and statefulsets. The annotations can be used to log type for your applications.
+This endpoint allows you to update annotations for Kubernetes deployments and statefulsets. The annotations can be used to set the log type for your applications.
 
 ### development
 - run `make server-local` to start the server
 - run `make docker-build` to build the docker image
 - run `make docker-push` to push the docker image to the registry
 - run `deploy-kubectl` to deploy the server to your cluster
-- run `clean-kubectl` to clean the server from your cluster
+- run `clean-kubectl` to delete the server from your cluster
