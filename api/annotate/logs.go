@@ -57,14 +57,17 @@ func UpdateLogsResourceAnnotations(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Validate input before updating resources to avoid changing resources and retuning an error
+	validRequests := validateLogsResourceRequests(resources)
+	// if one of the requests is invalid, return an error
+	if !validRequests {
+		logger.Error("Invalid input")
+		http.Error(w, "Invalid input ", http.StatusBadRequest)
+		return
+	}
+	// Update the resources
 	var responses []LogsResourceResponse
 	for _, resource := range resources {
-		// Validate input
-		if !isValidLogsResourceRequest(resource) {
-			logger.Error("Invalid input", err)
-			http.Error(w, "Invalid input", http.StatusBadRequest)
-			return
-		}
 		// Set the annotation key and value according to the telemetry type and action
 		var annotationKey = "logz.io/application_type"
 		value := resource.LogType
@@ -138,6 +141,14 @@ func UpdateLogsResourceAnnotations(w http.ResponseWriter, r *http.Request) {
 }
 
 func isValidLogsResourceRequest(req LogsResourceRequest) bool {
-	validKinds := []string{"deployment", "statefulset"}
-	return api.Contains(validKinds, req.Kind)
+	return req.Kind == "statefulset" || req.Kind == "deployment"
+}
+
+func validateLogsResourceRequests(resources []LogsResourceRequest) bool {
+	for _, resource := range resources {
+		if !isValidLogsResourceRequest(resource) {
+			return false
+		}
+	}
+	return true
 }

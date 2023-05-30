@@ -58,14 +58,17 @@ func UpdateTracesResourceAnnotations(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Validate input before updating resources to avoid changing resources and retuning an error
+	validRequests := validateTracesResourceRequests(resources)
+	// if one of the requests is invalid, return an error
+	if !validRequests {
+		logger.Error("Invalid input")
+		http.Error(w, "Invalid input ", http.StatusBadRequest)
+		return
+	}
+
 	var responses []TracesResourceResponse
 	for _, resource := range resources {
-		// Validate input
-		if !isValidTracesResourceRequest(resource) {
-			logger.Error("Invalid input", err)
-			http.Error(w, "Invalid input", http.StatusBadRequest)
-			return
-		}
 		// choose the annotation key and value according to the telemetry type and action
 		var annotationKey = "logz.io/traces_instrument"
 		value := "true"
@@ -141,10 +144,17 @@ func UpdateTracesResourceAnnotations(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(responses)
 }
 
-func isValidTracesResourceRequest(req TracesResourceRequest) bool {
-	validKinds := []string{"deployment", "statefulset"}
-	validActions := []string{"add", "delete"}
+func validateTracesResourceRequests(resources []TracesResourceRequest) bool {
+	for _, resource := range resources {
+		if !isValidTracesResourceRequest(resource) {
+			return false
+		}
+	}
+	return true
+}
 
-	return api.Contains(validKinds, req.Kind) &&
-		api.Contains(validActions, req.Action)
+func isValidTracesResourceRequest(req TracesResourceRequest) bool {
+	isValidKind := req.Kind == "statefulset" || req.Kind == "deployment"
+	isValidAction := req.Action == "add" || req.Action == "delete"
+	return isValidKind && isValidAction
 }
