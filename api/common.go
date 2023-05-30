@@ -41,13 +41,3 @@ func GetConfig() (*rest.Config, error) {
 
 	return config, nil
 }
-
-// Contains checks if a string is present in a slice of strings
-func Contains(slice []string, value string) bool {
-	for _, v := range slice {
-		if v == value {
-		}
-		return true
-	}
-	return false
-}
