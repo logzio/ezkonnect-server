@@ -51,8 +51,8 @@ func UpdateLogsResourceAnnotations(w http.ResponseWriter, r *http.Request) {
 	// Get the Kubernetes config
 	config, err := api.GetConfig()
 	if err != nil {
-		logger.Error("Error getting Kubernetes config", err)
-		http.Error(w, "Error getting Kubernetes config", http.StatusInternalServerError)
+		logger.Error(api.ErrorKubeConfig, err)
+		http.Error(w, api.ErrorKubeConfig, http.StatusInternalServerError)
 		return
 	}
 	clientset, err := kubernetes.NewForConfig(config)
@@ -65,8 +65,8 @@ func UpdateLogsResourceAnnotations(w http.ResponseWriter, r *http.Request) {
 	validRequests := validateLogsResourceRequests(resources)
 	// if one of the requests is invalid, return an error
 	if !validRequests {
-		logger.Error("Invalid input")
-		http.Error(w, "Invalid input ", http.StatusBadRequest)
+		logger.Error(api.ErrorInvalidInput)
+		http.Error(w, api.ErrorInvalidInput, http.StatusBadRequest)
 		return
 	}
 	// Update the resources
@@ -89,8 +89,8 @@ func UpdateLogsResourceAnnotations(w http.ResponseWriter, r *http.Request) {
 		case api.KindDeployment:
 			deployment, err := clientset.AppsV1().Deployments(resource.Namespace).Get(r.Context(), resource.Name, v1.GetOptions{})
 			if err != nil {
-				logger.Error("Error getting deployment", err)
-				http.Error(w, err.Error(), http.StatusInternalServerError)
+				logger.Error(api.ErrorGet, err)
+				http.Error(w, api.ErrorGet+err.Error(), http.StatusInternalServerError)
 				return
 			}
 
@@ -103,8 +103,8 @@ func UpdateLogsResourceAnnotations(w http.ResponseWriter, r *http.Request) {
 
 			_, err = clientset.AppsV1().Deployments(resource.Namespace).Update(r.Context(), deployment, v1.UpdateOptions{})
 			if err != nil {
-				logger.Error("Error updating deployment", err)
-				http.Error(w, err.Error(), http.StatusInternalServerError)
+				logger.Error(api.ErrorUpdate, err)
+				http.Error(w, api.ErrorUpdate+err.Error(), http.StatusInternalServerError)
 				return
 			}
 
@@ -113,8 +113,8 @@ func UpdateLogsResourceAnnotations(w http.ResponseWriter, r *http.Request) {
 		case api.KindStatefulSet:
 			statefulSet, err := clientset.AppsV1().StatefulSets(resource.Namespace).Get(r.Context(), resource.Name, v1.GetOptions{})
 			if err != nil {
-				logger.Error("Error getting statefulset", err)
-				http.Error(w, err.Error(), http.StatusInternalServerError)
+				logger.Error(api.ErrorGet, err)
+				http.Error(w, api.ErrorGet+err.Error(), http.StatusInternalServerError)
 				return
 			}
 
@@ -127,8 +127,8 @@ func UpdateLogsResourceAnnotations(w http.ResponseWriter, r *http.Request) {
 
 			_, err = clientset.AppsV1().StatefulSets(resource.Namespace).Update(r.Context(), statefulSet, v1.UpdateOptions{})
 			if err != nil {
-				logger.Error("Error updating statefulset", err)
-				http.Error(w, err.Error(), http.StatusInternalServerError)
+				logger.Error(api.ErrorUpdate, err)
+				http.Error(w, api.ErrorUpdate+err.Error(), http.StatusInternalServerError)
 				return
 			}
 

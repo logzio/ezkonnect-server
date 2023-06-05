@@ -51,15 +51,15 @@ func GetCustomResourcesHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	config, err := api.GetConfig()
 	if err != nil {
-		logger.Error("Error getting Kubernetes config", zap.Error(err))
-		http.Error(w, "Error getting Kubernetes config", http.StatusInternalServerError)
+		logger.Error(api.ErrorKubeConfig, zap.Error(err))
+		http.Error(w, api.ErrorKubeConfig+err.Error(), http.StatusInternalServerError)
 		return
 	}
 	// Create a dynamic client
 	dynamicClient, err := dynamic.NewForConfig(config)
 	if err != nil {
-		logger.Error("Error creating dynamic client", zap.Error(err))
-		http.Error(w, "Error creating dynamic client", http.StatusInternalServerError)
+		logger.Error(api.ErrorDynamic, zap.Error(err))
+		http.Error(w, api.ErrorDynamic+err.Error(), http.StatusInternalServerError)
 		return
 	}
 	gvr := schema.GroupVersionResource{
@@ -70,8 +70,8 @@ func GetCustomResourcesHandler(w http.ResponseWriter, r *http.Request) {
 	// List all custom resources
 	instrumentedApplicationsList, err := dynamicClient.Resource(gvr).Namespace("").List(context.Background(), v1.ListOptions{})
 	if err != nil {
-		logger.Error("Error listing custom resources", zap.Error(err))
-		http.Error(w, "Error listing custom resources", http.StatusInternalServerError)
+		logger.Error(api.ErrorList, zap.Error(err))
+		http.Error(w, api.ErrorList+err.Error(), http.StatusInternalServerError)
 		return
 	}
 	// Build a list of InstrumentdApplicationData from the custom resources

@@ -11,10 +11,18 @@ import (
 )
 
 const (
-	KindDeployment  = "Deployment"
-	KindStatefulSet = "StatefulSet"
-	ActionAdd       = "add"
-	ActionDelete    = "delete"
+	KindDeployment    = "Deployment"
+	KindStatefulSet   = "StatefulSet"
+	ActionAdd         = "add"
+	ActionDelete      = "delete"
+	ErrorDecodeJSON   = "Error decoding JSON body "
+	ErrorKubeConfig   = "Error getting Kubernetes config "
+	ErrorKubeClient   = "Error creating Kubernetes clientset "
+	ErrorInvalidInput = "Invalid input "
+	ErrorDynamic      = "Error getting dynamic client "
+	ErrorUpdate       = "Error updating resource "
+	ErrorGet          = "Error getting resource "
+	ErrorList         = "Error listing resources "
 )
 
 var (
