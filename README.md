@@ -26,3 +26,8 @@ This endpoint allows you to update annotations for Kubernetes deployments and st
 - run `make docker-push` to push the docker image to the registry
 - run `deploy-kubectl` to deploy the server to your cluster
 - run `clean-kubectl` to delete the server from your cluster
+
+
+## changelog
+- 0.0.1
+  - Initial release
