@@ -9,7 +9,7 @@ import (
 	"net/http"
 )
 
-// main starts the server. There are two endpoints:
+// main starts the server. Endpoints:
 // 1. /api/v1/state - returns a list of all custom resources of type InstrumentedApplication
 // 2. /api/v1/annotate - handles the POST request for annotating a deployment or a statefulset
 // 3. /api/v1/annotate/logs - handles the POST request for annotating a deployment or a statefulset with log annotations

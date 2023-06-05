@@ -8,6 +8,10 @@ import (
 	"net/http"
 )
 
+const (
+	LogTypeAnnotation = "logz.io/application_type"
+)
+
 // LogsResourceRequest is the JSON body of the POST request
 // It contains the name, controller_kind, namespace, and log type of the resource
 // name: name of the resource
@@ -24,7 +28,7 @@ type LogsResourceRequest struct {
 // LogsResourceResponse is the JSON response of the POST request
 // It contains the name, kind, namespace and updated annotations of the resource
 // name: name of the resource
-// kind: kind of the resource (deployment or statefulset)
+// kind: kind of the resource (deployment or statefulset) consts defined at `common.go` (api.KindDeployment, api.KindStatefulSet)
 // namespace: namespace of the resource
 // updated_annotations: updated annotations of the resource
 type LogsResourceResponse struct {
@@ -68,14 +72,11 @@ func UpdateLogsResourceAnnotations(w http.ResponseWriter, r *http.Request) {
 	// Update the resources
 	var responses []LogsResourceResponse
 	for _, resource := range resources {
-		// Set the annotation key and value according to the telemetry type and action
-		var annotationKey = "logz.io/application_type"
+
 		value := resource.LogType
-
 		annotations := map[string]string{
-			annotationKey: value,
+			LogTypeAnnotation: value,
 		}
-
 		// Create the response
 		response := LogsResourceResponse{
 			Name:               resource.Name,
@@ -85,7 +86,7 @@ func UpdateLogsResourceAnnotations(w http.ResponseWriter, r *http.Request) {
 		}
 
 		switch resource.Kind {
-		case "deployment":
+		case api.KindDeployment:
 			deployment, err := clientset.AppsV1().Deployments(resource.Namespace).Get(r.Context(), resource.Name, v1.GetOptions{})
 			if err != nil {
 				logger.Error("Error getting deployment", err)
@@ -109,7 +110,7 @@ func UpdateLogsResourceAnnotations(w http.ResponseWriter, r *http.Request) {
 
 			responses = append(responses, response)
 
-		case "statefulset":
+		case api.KindStatefulSet:
 			statefulSet, err := clientset.AppsV1().StatefulSets(resource.Namespace).Get(r.Context(), resource.Name, v1.GetOptions{})
 			if err != nil {
 				logger.Error("Error getting statefulset", err)
@@ -141,7 +142,12 @@ func UpdateLogsResourceAnnotations(w http.ResponseWriter, r *http.Request) {
 }
 
 func isValidLogsResourceRequest(req LogsResourceRequest) bool {
-	return req.Kind == "statefulset" || req.Kind == "deployment"
+	for _, validKind := range api.ValidKinds {
+		if req.Kind == validKind {
+			return true
+		}
+	}
+	return false
 }
 
 func validateLogsResourceRequests(resources []LogsResourceRequest) bool {

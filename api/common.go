@@ -10,6 +10,18 @@ import (
 	"path/filepath"
 )
 
+const (
+	KindDeployment  = "Deployment"
+	KindStatefulSet = "StatefulSet"
+	ActionAdd       = "add"
+	ActionDelete    = "delete"
+)
+
+var (
+	ValidKinds   = []string{KindDeployment, KindStatefulSet}
+	ValidActions = []string{ActionAdd, ActionDelete}
+)
+
 func InitLogger() zap.SugaredLogger {
 	config := zap.NewProductionConfig()
 	config.OutputPaths = []string{"stdout"} // write to stdout

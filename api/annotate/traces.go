@@ -8,12 +8,16 @@ import (
 	"net/http"
 )
 
+const (
+	InstrumentationAnnotation = "logz.io/traces_instrument"
+)
+
 // TracesResourceRequest ResourceRequest is the JSON body of the POST request
 // It contains the name, kind, namespace, telemetry type and action of the resource
 // name: name of the resource
-// kind: kind of the resource (deployment or statefulset)
+// kind: kind of the resource (deployment or statefulset) consts defined at `common.go` (api.KindDeployment, api.KindStatefulSet)
 // namespace: namespace of the resource
-// action: action to perform (add or delete)
+// action: action to perform (add or delete) consts defined at `common.go` (api.ActionAdd, api.ActionDelete)
 type TracesResourceRequest struct {
 	Name      string `json:"name"`
 	Kind      string `json:"controller_kind"`
@@ -59,9 +63,8 @@ func UpdateTracesResourceAnnotations(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Validate input before updating resources to avoid changing resources and retuning an error
-	validRequests := validateTracesResourceRequests(resources)
 	// if one of the requests is invalid, return an error
-	if !validRequests {
+	if !validateTracesResourceRequests(resources) {
 		logger.Error("Invalid input")
 		http.Error(w, "Invalid input ", http.StatusBadRequest)
 		return
@@ -70,14 +73,13 @@ func UpdateTracesResourceAnnotations(w http.ResponseWriter, r *http.Request) {
 	var responses []TracesResourceResponse
 	for _, resource := range resources {
 		// choose the annotation key and value according to the telemetry type and action
-		var annotationKey = "logz.io/traces_instrument"
 		value := "true"
-		if resource.Action == "delete" {
+		if resource.Action == api.ActionDelete {
 			value = "rollback"
 		}
 
 		annotations := map[string]string{
-			annotationKey: value,
+			InstrumentationAnnotation: value,
 		}
 
 		// Create the response
@@ -89,7 +91,7 @@ func UpdateTracesResourceAnnotations(w http.ResponseWriter, r *http.Request) {
 		}
 
 		switch resource.Kind {
-		case "deployment":
+		case api.KindDeployment:
 			deployment, err := clientset.AppsV1().Deployments(resource.Namespace).Get(r.Context(), resource.Name, v1.GetOptions{})
 			if err != nil {
 				logger.Error("Error getting deployment", err)
@@ -113,7 +115,7 @@ func UpdateTracesResourceAnnotations(w http.ResponseWriter, r *http.Request) {
 
 			responses = append(responses, response)
 
-		case "statefulset":
+		case api.KindStatefulSet:
 			statefulSet, err := clientset.AppsV1().StatefulSets(resource.Namespace).Get(r.Context(), resource.Name, v1.GetOptions{})
 			if err != nil {
 				logger.Error("Error getting statefulset", err)
@@ -154,7 +156,17 @@ func validateTracesResourceRequests(resources []TracesResourceRequest) bool {
 }
 
 func isValidTracesResourceRequest(req TracesResourceRequest) bool {
-	isValidKind := req.Kind == "statefulset" || req.Kind == "deployment"
-	isValidAction := req.Action == "add" || req.Action == "delete"
+	isValidAction := false
+	isValidKind := false
+	for _, validAction := range api.ValidActions {
+		if req.Action == validAction {
+			isValidAction = true
+		}
+	}
+	for _, validKind := range api.ValidKinds {
+		if req.Kind == validKind {
+			isValidKind = true
+		}
+	}
 	return isValidKind && isValidAction
 }
