@@ -1,5 +1,5 @@
 # Ezkonnect-server
-A web server for Ezkonnect written in go.
+Ezkonnect server is a web server written in go that exposes an API for Ezkonnect. It is responsible for managing the state of instrumented applications.
 This server is designed to run in a kubernetes environment, However it can run locally as well if a `kubeconfig` file connected to a kubernetes cluster is present on your machine.
 ### getting started
 1. Clone the repo
@@ -29,5 +29,5 @@ This endpoint allows you to update annotations for Kubernetes deployments and st
 
 
 ## changelog
-- 0.0.1
-  - Initial release
+- v1.0.0 - Initial release
+  - A web server written in go that exposes an API for Ezkonnect. It is responsible for managing the state of instrumented applications.
