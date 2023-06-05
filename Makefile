@@ -1,7 +1,7 @@
 IMAGE_NAME := ezkonnect-server
-IMAGE_TAG := 0.0.1
-DOCKER_REPO := yotamloe/$(IMAGE_NAME):$(IMAGE_TAG)
-K8S_NAMESPACE := default
+IMAGE_TAG := v1.0.0
+DOCKER_REPO := logzio/$(IMAGE_NAME):$(IMAGE_TAG)
+K8S_NAMESPACE := ezkonnect
 
 .PHONY: docker-build
 docker-build:
