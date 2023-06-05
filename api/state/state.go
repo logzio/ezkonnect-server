@@ -12,15 +12,22 @@ import (
 	"strings"
 )
 
+const (
+	ResourceGroup                   = "logz.io"
+	ResourceVersion                 = "v1alpha1"
+	ResourceInstrumentedApplication = "instrumentedapplications"
+)
+
 // InstrumentdApplicationData is the data structure for the custom resource
 // the response will contain a list of these fields
 // name: the name of the custom resource
 // namespace: the namespace of the custom resource
 // controller_kind: the kind of the controller that created the custom resource
 // container_name: the name of the container
-// instrumented: whether the container is instrumented or not
+// traces_instrumented: whether the container is instrumented or not
 // application: the name of the application that the container belongs to
 // language: the language of the application that the container belongs to
+// detection_status: the status of the detection process
 // log_type: the log type of the application that the container belongs to
 type InstrumentdApplicationData struct {
 	Name               string  `json:"name"`
@@ -56,9 +63,9 @@ func GetCustomResourcesHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	gvr := schema.GroupVersionResource{
-		Group:    "logz.io",
-		Version:  "v1alpha1",
-		Resource: "instrumentedapplications",
+		Group:    ResourceGroup,
+		Version:  ResourceVersion,
+		Resource: ResourceInstrumentedApplication,
 	}
 	// List all custom resources
 	instrumentedApplicationsList, err := dynamicClient.Resource(gvr).Namespace("").List(context.Background(), v1.ListOptions{})
