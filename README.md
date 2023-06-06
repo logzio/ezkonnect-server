@@ -29,5 +29,7 @@ This endpoint allows you to update annotations for Kubernetes deployments and st
 
 
 ## changelog
+- v1.0.1
+  - Add support for adding service name
 - v1.0.0 - Initial release
   - A web server written in go that exposes an API for Ezkonnect. It is responsible for managing the state of instrumented applications.

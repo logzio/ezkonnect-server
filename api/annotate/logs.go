@@ -6,6 +6,7 @@ import (
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"net/http"
+	"strings"
 )
 
 const (
@@ -143,7 +144,7 @@ func UpdateLogsResourceAnnotations(w http.ResponseWriter, r *http.Request) {
 
 func isValidLogsResourceRequest(req LogsResourceRequest) bool {
 	for _, validKind := range api.ValidKinds {
-		if req.Kind == validKind {
+		if req.Kind == strings.ToLower(validKind) {
 			return true
 		}
 	}

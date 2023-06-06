@@ -33,7 +33,6 @@ Each instrumented application can have a `language` and/or an `application` fiel
         "controller_kind": "deployment",
         "container_name": "app-container",
         "traces_instrumented": true,
-        "metrics_instrumented": false,
         "application": null,
         "language": "python"
     },
@@ -42,8 +41,7 @@ Each instrumented application can have a `language` and/or an `application` fiel
         "namespace": "default",
         "controller_kind": "deployment",
         "container_name": "",
-        "traces_instrumented": false,
-        "metrics_instrumented": false
+        "traces_instrumented": false
     },
     {
         "name": "statefulset-with-app-detection",
@@ -51,7 +49,6 @@ Each instrumented application can have a `language` and/or an `application` fiel
         "controller_kind": "statefulset",
         "container_name": "app-container",
         "traces_instrumented": false,
-        "metrics_instrumented": false,
         "application": "my-app",
         "language": null
     },
@@ -61,7 +58,6 @@ Each instrumented application can have a `language` and/or an `application` fiel
         "controller_kind": "deployment",
         "container_name": "app-container",
         "traces_instrumented": false,
-        "metrics_instrumented": false,
         "application": null,
         "language": "java"
     }
@@ -105,6 +101,7 @@ The request body should be a JSON array of objects, where each object contains t
 - `controller_kind` (string): The kind of the resource, either deployment or statefulset.
 - `namespace` (string): The namespace of the resource.
 - `action` (string): The action to perform, either add or delete.
+- `service_name` (string): The name of the service associated with the resource.
 
 #### Example Request Body
 json
@@ -114,13 +111,15 @@ json
         "name": "my-deployment",
         "controller_kind": "deployment",
         "namespace": "default",
-        "action": "add"
+        "action": "add",
+        "service_name": "my-service"
     },
     {
         "name": "my-statefulset",
         "controller_kind": "statefulset",
         "namespace": "default",
-        "action": "delete"
+        "action": "delete",
+        "service_name": "my-other-service"
     }
 ]
 ```
@@ -143,7 +142,8 @@ The response body will be a JSON array of objects, where each object contains th
         "namespace": "default",
         "controller_kind": "deployment",
         "updated_annotations": {
-            "logz.io/instrument": "true"
+            "logz.io/instrument": "true",
+            "logz.io/service-name": "my-service"
         }
     },
     {
@@ -151,7 +151,8 @@ The response body will be a JSON array of objects, where each object contains th
         "namespace": "default",
         "controller_kind": "statefulset",
         "updated_annotations": {
-            "logz.io/instrument": "rollback"
+            "logz.io/instrument": "rollback",
+            "logz.io/service-name": "my-other-service"
         }
     }
 ]

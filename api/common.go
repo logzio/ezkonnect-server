@@ -11,8 +11,8 @@ import (
 )
 
 const (
-	KindDeployment    = "Deployment"
-	KindStatefulSet   = "StatefulSet"
+	KindDeployment    = "deployment"
+	KindStatefulSet   = "statefulSet"
 	ActionAdd         = "add"
 	ActionDelete      = "delete"
 	ErrorDecodeJSON   = "Error decoding JSON body "
