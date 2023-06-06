@@ -6,10 +6,12 @@ import (
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"net/http"
+	"strings"
 )
 
 const (
 	InstrumentationAnnotation = "logz.io/traces_instrument"
+	ServiceNameAnnotation     = "logz.io/service-name"
 )
 
 // TracesResourceRequest ResourceRequest is the JSON body of the POST request
@@ -18,11 +20,13 @@ const (
 // kind: kind of the resource (deployment or statefulset) consts defined at `common.go` (api.KindDeployment, api.KindStatefulSet)
 // namespace: namespace of the resource
 // action: action to perform (add or delete) consts defined at `common.go` (api.ActionAdd, api.ActionDelete)
+// service_name: name of the service
 type TracesResourceRequest struct {
-	Name      string `json:"name"`
-	Kind      string `json:"controller_kind"`
-	Namespace string `json:"namespace"`
-	Action    string `json:"action"`
+	Name        string `json:"name"`
+	Kind        string `json:"controller_kind"`
+	Namespace   string `json:"namespace"`
+	Action      string `json:"action"`
+	ServiceName string `json:"service_name"`
 }
 
 // TracesResourceResponse  is the JSON response of the POST request
@@ -73,13 +77,15 @@ func UpdateTracesResourceAnnotations(w http.ResponseWriter, r *http.Request) {
 	var responses []TracesResourceResponse
 	for _, resource := range resources {
 		// choose the annotation key and value according to the telemetry type and action
-		value := "true"
+		actionValue := "true"
 		if resource.Action == api.ActionDelete {
-			value = "rollback"
+			actionValue = "rollback"
 		}
-
-		annotations := map[string]string{
-			InstrumentationAnnotation: value,
+		annotations := map[string]string{}
+		annotations[InstrumentationAnnotation] = actionValue
+		// add service name annotation if exists
+		if resource.ServiceName != "" {
+			annotations[ServiceNameAnnotation] = resource.ServiceName
 		}
 
 		// Create the response
@@ -159,12 +165,12 @@ func isValidTracesResourceRequest(req TracesResourceRequest) bool {
 	isValidAction := false
 	isValidKind := false
 	for _, validAction := range api.ValidActions {
-		if req.Action == validAction {
+		if req.Action == strings.ToLower(validAction) {
 			isValidAction = true
 		}
 	}
 	for _, validKind := range api.ValidKinds {
-		if req.Kind == validKind {
+		if req.Kind == strings.ToLower(validKind) {
 			isValidKind = true
 		}
 	}

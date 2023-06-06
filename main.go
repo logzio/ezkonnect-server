@@ -11,7 +11,7 @@ import (
 
 // main starts the server. Endpoints:
 // 1. /api/v1/state - returns a list of all custom resources of type InstrumentedApplication
-// 2. /api/v1/annotate - handles the POST request for annotating a deployment or a statefulset
+// 2. /api/v1/annotate/traces - handles the POST request for annotating a deployment or a statefulset
 // 3. /api/v1/annotate/logs - handles the POST request for annotating a deployment or a statefulset with log annotations
 func main() {
 	router := mux.NewRouter().StrictSlash(true)
