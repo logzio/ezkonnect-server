@@ -98,6 +98,7 @@ func UpdateTracesResourceAnnotations(w http.ResponseWriter, r *http.Request) {
 
 		switch resource.Kind {
 		case api.KindDeployment:
+			logger.Info("Updating deployment with instrumentation annotation", resource.Name)
 			deployment, err := clientset.AppsV1().Deployments(resource.Namespace).Get(r.Context(), resource.Name, v1.GetOptions{})
 			if err != nil {
 				logger.Error(api.ErrorGet, err)
@@ -122,6 +123,7 @@ func UpdateTracesResourceAnnotations(w http.ResponseWriter, r *http.Request) {
 			responses = append(responses, response)
 
 		case api.KindStatefulSet:
+			logger.Info("Updating statefulset with instrumentation annotation ", resource.Name)
 			statefulSet, err := clientset.AppsV1().StatefulSets(resource.Namespace).Get(r.Context(), resource.Name, v1.GetOptions{})
 			if err != nil {
 				logger.Error(api.ErrorGet, err)

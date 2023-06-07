@@ -29,6 +29,8 @@ This endpoint allows you to update annotations for Kubernetes deployments and st
 
 
 ## changelog
+- v1.0.2
+  - Ignore internal resources
 - v1.0.1
   - Add support for adding service name
 - v1.0.0 - Initial release

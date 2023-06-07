@@ -78,6 +78,10 @@ func GetCustomResourcesHandler(w http.ResponseWriter, r *http.Request) {
 	var data []InstrumentdApplicationData
 	for _, item := range instrumentedApplicationsList.Items {
 		name := item.GetName()
+		// Skip internal resources
+		if api.IsInternalResource(name) {
+			continue
+		}
 		namespace := item.GetNamespace()
 		ControllerKind := strings.ToLower(item.GetOwnerReferences()[0].Kind)
 		status := item.Object["status"].(map[string]interface{})

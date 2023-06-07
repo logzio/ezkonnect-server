@@ -8,6 +8,7 @@ import (
 	"k8s.io/client-go/util/homedir"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 const (
@@ -60,4 +61,8 @@ func GetConfig() (*rest.Config, error) {
 	}
 
 	return config, nil
+}
+
+func IsInternalResource(name string) bool {
+	return strings.Contains(name, "ezkonnect") || (name == "kubernetes-instrumentor")
 }
