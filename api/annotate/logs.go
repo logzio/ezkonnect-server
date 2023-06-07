@@ -63,6 +63,7 @@ func UpdateLogsResourceAnnotations(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Validate input before updating resources to avoid changing resources and retuning an error
+	logger.Info("Validating input")
 	validRequests := validateLogsResourceRequests(resources)
 	// if one of the requests is invalid, return an error
 	if !validRequests {
@@ -88,6 +89,7 @@ func UpdateLogsResourceAnnotations(w http.ResponseWriter, r *http.Request) {
 
 		switch resource.Kind {
 		case api.KindDeployment:
+			logger.Info("Updating deployment with log type annotation", resource.Name)
 			deployment, err := clientset.AppsV1().Deployments(resource.Namespace).Get(r.Context(), resource.Name, v1.GetOptions{})
 			if err != nil {
 				logger.Error(api.ErrorGet, err)
@@ -112,6 +114,7 @@ func UpdateLogsResourceAnnotations(w http.ResponseWriter, r *http.Request) {
 			responses = append(responses, response)
 
 		case api.KindStatefulSet:
+			logger.Info("Updating statefulset with log type annotation", resource.Name)
 			statefulSet, err := clientset.AppsV1().StatefulSets(resource.Namespace).Get(r.Context(), resource.Name, v1.GetOptions{})
 			if err != nil {
 				logger.Error(api.ErrorGet, err)
