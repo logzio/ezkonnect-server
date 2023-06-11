@@ -30,7 +30,7 @@ This endpoint allows you to update annotations for Kubernetes deployments and st
 
 ## changelog
 - v1.0.3
-  - Delete `log_type` annotation while rolling back
+  - Delete `logz.io/application_type` annotation while rolling back
 - v1.0.2
   - Ignore internal resources
 - v1.0.1
