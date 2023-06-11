@@ -74,11 +74,11 @@ func UpdateLogsResourceAnnotations(w http.ResponseWriter, r *http.Request) {
 	// Update the resources
 	var responses []LogsResourceResponse
 	for _, resource := range resources {
-
 		value := resource.LogType
 		annotations := map[string]string{
 			LogTypeAnnotation: value,
 		}
+
 		// Create the response
 		response := LogsResourceResponse{
 			Name:               resource.Name,
@@ -86,10 +86,9 @@ func UpdateLogsResourceAnnotations(w http.ResponseWriter, r *http.Request) {
 			Kind:               resource.Kind,
 			UpdatedAnnotations: annotations,
 		}
-
 		switch resource.Kind {
 		case api.KindDeployment:
-			logger.Info("Updating deployment with log type annotation", resource.Name)
+			logger.Info("Updating deployment: ", resource.Name)
 			deployment, err := clientset.AppsV1().Deployments(resource.Namespace).Get(r.Context(), resource.Name, v1.GetOptions{})
 			if err != nil {
 				logger.Error(api.ErrorGet, err)
@@ -97,11 +96,14 @@ func UpdateLogsResourceAnnotations(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			for k, v := range annotations {
-				if deployment.Spec.Template.ObjectMeta.Annotations == nil {
-					deployment.Spec.Template.ObjectMeta.Annotations = make(map[string]string)
-				}
-				deployment.Spec.Template.ObjectMeta.Annotations[k] = v
+			if deployment.Spec.Template.ObjectMeta.Annotations == nil {
+				deployment.Spec.Template.ObjectMeta.Annotations = make(map[string]string)
+			}
+
+			if len(value) != 0 {
+				deployment.Spec.Template.ObjectMeta.Annotations[LogTypeAnnotation] = value
+			} else {
+				delete(deployment.Spec.Template.ObjectMeta.Annotations, LogTypeAnnotation)
 			}
 
 			_, err = clientset.AppsV1().Deployments(resource.Namespace).Update(r.Context(), deployment, v1.UpdateOptions{})
@@ -114,7 +116,7 @@ func UpdateLogsResourceAnnotations(w http.ResponseWriter, r *http.Request) {
 			responses = append(responses, response)
 
 		case api.KindStatefulSet:
-			logger.Info("Updating statefulset with log type annotation", resource.Name)
+			logger.Info("Updating statefulset: ", resource.Name)
 			statefulSet, err := clientset.AppsV1().StatefulSets(resource.Namespace).Get(r.Context(), resource.Name, v1.GetOptions{})
 			if err != nil {
 				logger.Error(api.ErrorGet, err)
@@ -122,11 +124,14 @@ func UpdateLogsResourceAnnotations(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			for k, v := range annotations {
-				if statefulSet.Spec.Template.ObjectMeta.Annotations == nil {
-					statefulSet.Spec.Template.ObjectMeta.Annotations = make(map[string]string)
-				}
-				statefulSet.Spec.Template.ObjectMeta.Annotations[k] = v
+			if statefulSet.Spec.Template.ObjectMeta.Annotations == nil {
+				statefulSet.Spec.Template.ObjectMeta.Annotations = make(map[string]string)
+			}
+
+			if len(value) != 0 {
+				statefulSet.Spec.Template.ObjectMeta.Annotations[LogTypeAnnotation] = value
+			} else {
+				delete(statefulSet.Spec.Template.ObjectMeta.Annotations, LogTypeAnnotation)
 			}
 
 			_, err = clientset.AppsV1().StatefulSets(resource.Namespace).Update(r.Context(), statefulSet, v1.UpdateOptions{})
