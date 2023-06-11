@@ -1,5 +1,5 @@
 IMAGE_NAME := ezkonnect-server
-IMAGE_TAG := v1.0.2
+IMAGE_TAG := v1.0.3
 DOCKER_REPO := logzio/$(IMAGE_NAME):$(IMAGE_TAG)
 K8S_NAMESPACE := ezkonnect
 
