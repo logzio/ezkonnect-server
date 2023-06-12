@@ -17,9 +17,16 @@ The response body will be a JSON array of objects, where each object contains th
 - `controller_kind` (string): The kind of the controller (lowercased owner reference kind).
 - `container_name` (string, optional): The container name associated with the instrumented application. Will be empty if both language and application fields are empty.
 - `traces_instrumented` (bool): Whether the application is instrumented or not.
-- `metrics_instrumented` (bool): Whether the application is exporting metrics or not.
 - `application` (string, optional): The application name if available in the spec.
 - `language` (string, optional): The programming language if available in the spec.
+- `log_type` (string, optional): The log type if available in the spec.
+- `opentelemetry_detected` bool: Whether the application has opentelemetry libraries or not.
+- `detection_status` (string): The status of the detection process. Can be one of the following:
+    - `pending`: The detection process has not started yet.
+    - `Completed`: The detection process has completed successfully.
+    - `Running`: The detection process is still running.
+    - `error`: The detection process has failed.
+
 
 Each instrumented application can have a `language` and/or an `application` field, or none of them. If neither `language` nor `application` is present, the application cannot be instrumented. If at least one of `language` or `application` fields is non-empty, there will also be a `container_name` field. However, if both language and application fields are empty, the `container_name` will be empty as well.
 
@@ -34,14 +41,20 @@ Each instrumented application can have a `language` and/or an `application` fiel
         "container_name": "app-container",
         "traces_instrumented": true,
         "application": null,
-        "language": "python"
+        "language": "python",
+        "detection_status": "Completed",
+        "opentelemetry_detected": false,
+        "log_type": "nginx"
     },
     {
         "name": "uninstrumented-app",
         "namespace": "default",
         "controller_kind": "deployment",
         "container_name": "",
-        "traces_instrumented": false
+        "traces_instrumented": false,
+        "detection_status": "Completed",
+        "opentelemetry_detected": false,
+        "log_type": "log"
     },
     {
         "name": "statefulset-with-app-detection",
@@ -50,7 +63,10 @@ Each instrumented application can have a `language` and/or an `application` fiel
         "container_name": "app-container",
         "traces_instrumented": false,
         "application": "my-app",
-        "language": null
+        "language": null,
+        "detection_status": "Completed",
+        "opentelemetry_detected": false,
+        "log_type": "log2"
     },
     {
         "name": "deployment-with-language-detection",
@@ -59,7 +75,10 @@ Each instrumented application can have a `language` and/or an `application` fiel
         "container_name": "app-container",
         "traces_instrumented": false,
         "application": null,
-        "language": "java"
+        "language": "java",
+        "detection_status": "Completed",
+        "opentelemetry_detected": false,
+        "log_type": "nginx"
     }
 ]
 ```
