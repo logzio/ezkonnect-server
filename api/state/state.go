@@ -30,16 +30,16 @@ const (
 // detection_status: the status of the detection process
 // log_type: the log type of the application that the container belongs to
 type InstrumentdApplicationData struct {
-	Name                  string  `json:"name"`
-	Namespace             string  `json:"namespace"`
-	ControllerKind        string  `json:"controller_kind"`
-	ContainerName         *string `json:"container_name"`
-	TracesInstrumented    bool    `json:"traces_instrumented"`
-	Application           *string `json:"application"`
-	Language              *string `json:"language"`
-	DetectionStatus       string  `json:"detection_status"`
-	OpentelemetryDetected *bool   `json:"opentelemetry_detected"`
-	LogType               *string `json:"log_type"`
+	Name                       string  `json:"name"`
+	Namespace                  string  `json:"namespace"`
+	ControllerKind             string  `json:"controller_kind"`
+	ContainerName              *string `json:"container_name"`
+	TracesInstrumented         bool    `json:"traces_instrumented"`
+	Application                *string `json:"application"`
+	Language                   *string `json:"language"`
+	DetectionStatus            string  `json:"detection_status"`
+	OpentelemetryPreconfigured *bool   `json:"opentelemetry_preconfigured"`
+	LogType                    *string `json:"log_type"`
 }
 
 // GetCustomResourcesHandler lists all custom resources of type InstrumentedApplication
@@ -98,15 +98,15 @@ func GetCustomResourcesHandler(w http.ResponseWriter, r *http.Request) {
 				containerNameStr := language.(map[string]interface{})["containerName"].(string)
 				otelDetectedBool := language.(map[string]interface{})["opentelemetryDetected"].(bool)
 				entry := InstrumentdApplicationData{
-					Name:                  name,
-					Namespace:             namespace,
-					ControllerKind:        ControllerKind,
-					TracesInstrumented:    status["tracesInstrumented"].(bool),
-					ContainerName:         &containerNameStr,
-					Language:              &langStr,
-					DetectionStatus:       status["instrumentationDetection"].(map[string]interface{})["phase"].(string),
-					LogType:               &logType,
-					OpentelemetryDetected: &otelDetectedBool,
+					Name:                       name,
+					Namespace:                  namespace,
+					ControllerKind:             ControllerKind,
+					TracesInstrumented:         status["tracesInstrumented"].(bool),
+					ContainerName:              &containerNameStr,
+					Language:                   &langStr,
+					DetectionStatus:            status["instrumentationDetection"].(map[string]interface{})["phase"].(string),
+					LogType:                    &logType,
+					OpentelemetryPreconfigured: &otelDetectedBool,
 				}
 				data = append(data, entry)
 			}
@@ -120,15 +120,15 @@ func GetCustomResourcesHandler(w http.ResponseWriter, r *http.Request) {
 				containerNameStr := application.(map[string]interface{})["containerName"].(string)
 				otelDetectedBool := false
 				entry := InstrumentdApplicationData{
-					Name:                  name,
-					Namespace:             namespace,
-					ControllerKind:        ControllerKind,
-					TracesInstrumented:    status["tracesInstrumented"].(bool),
-					ContainerName:         &containerNameStr,
-					Application:           &applicationStr,
-					DetectionStatus:       status["instrumentationDetection"].(map[string]interface{})["phase"].(string),
-					LogType:               &logType,
-					OpentelemetryDetected: &otelDetectedBool,
+					Name:                       name,
+					Namespace:                  namespace,
+					ControllerKind:             ControllerKind,
+					TracesInstrumented:         status["tracesInstrumented"].(bool),
+					ContainerName:              &containerNameStr,
+					Application:                &applicationStr,
+					DetectionStatus:            status["instrumentationDetection"].(map[string]interface{})["phase"].(string),
+					LogType:                    &logType,
+					OpentelemetryPreconfigured: &otelDetectedBool,
 				}
 				data = append(data, entry)
 			}
@@ -137,13 +137,13 @@ func GetCustomResourcesHandler(w http.ResponseWriter, r *http.Request) {
 		if !langOk && !appOk {
 			otelDetectedBool := false
 			entry := InstrumentdApplicationData{
-				Name:                  name,
-				Namespace:             namespace,
-				ControllerKind:        ControllerKind,
-				TracesInstrumented:    status["tracesInstrumented"].(bool),
-				DetectionStatus:       status["instrumentationDetection"].(map[string]interface{})["phase"].(string),
-				LogType:               &logType,
-				OpentelemetryDetected: &otelDetectedBool,
+				Name:                       name,
+				Namespace:                  namespace,
+				ControllerKind:             ControllerKind,
+				TracesInstrumented:         status["tracesInstrumented"].(bool),
+				DetectionStatus:            status["instrumentationDetection"].(map[string]interface{})["phase"].(string),
+				LogType:                    &logType,
+				OpentelemetryPreconfigured: &otelDetectedBool,
 			}
 			data = append(data, entry)
 		}

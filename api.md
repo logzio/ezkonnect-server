@@ -20,7 +20,7 @@ The response body will be a JSON array of objects, where each object contains th
 - `application` (string, optional): The application name if available in the spec.
 - `language` (string, optional): The programming language if available in the spec.
 - `log_type` (string, optional): The log type if available in the spec.
-- `opentelemetry_detected` bool: Whether the application has opentelemetry libraries or not.
+- `opentelemetry_preconfigured` bool: Whether the application has opentelemetry libraries or not.
 - `detection_status` (string): The status of the detection process. Can be one of the following:
     - `pending`: The detection process has not started yet.
     - `Completed`: The detection process has completed successfully.
@@ -43,7 +43,7 @@ Each instrumented application can have a `language` and/or an `application` fiel
         "application": null,
         "language": "python",
         "detection_status": "Completed",
-        "opentelemetry_detected": false,
+        "opentelemetry_preconfigured": false,
         "log_type": "nginx"
     },
     {
@@ -53,7 +53,7 @@ Each instrumented application can have a `language` and/or an `application` fiel
         "container_name": "",
         "traces_instrumented": false,
         "detection_status": "Completed",
-        "opentelemetry_detected": false,
+        "opentelemetry_preconfigured": false,
         "log_type": "log"
     },
     {
@@ -65,7 +65,7 @@ Each instrumented application can have a `language` and/or an `application` fiel
         "application": "my-app",
         "language": null,
         "detection_status": "Completed",
-        "opentelemetry_detected": false,
+        "opentelemetry_preconfigured": false,
         "log_type": "log2"
     },
     {
@@ -77,7 +77,7 @@ Each instrumented application can have a `language` and/or an `application` fiel
         "application": null,
         "language": "java",
         "detection_status": "Completed",
-        "opentelemetry_detected": false,
+        "opentelemetry_preconfigured": false,
         "log_type": "nginx"
     }
 ]
