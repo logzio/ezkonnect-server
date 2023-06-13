@@ -96,7 +96,7 @@ func GetCustomResourcesHandler(w http.ResponseWriter, r *http.Request) {
 			for _, language := range languages {
 				langStr := language.(map[string]interface{})["language"].(string)
 				containerNameStr := language.(map[string]interface{})["containerName"].(string)
-				otelDetectedBool := language.(map[string]interface{})["opentelemetryDetected"].(bool)
+				otelDetectedBool := language.(map[string]interface{})["opentelemetryPreconfigured"].(bool)
 				entry := InstrumentdApplicationData{
 					Name:                       name,
 					Namespace:                  namespace,
