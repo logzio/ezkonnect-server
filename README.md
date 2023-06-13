@@ -29,6 +29,9 @@ This endpoint allows you to update annotations for Kubernetes deployments and st
 
 
 ## changelog
+- v1.0.4
+  - Add support for opentelemetry detection
+  - update api docs
 - v1.0.3
   - Delete `logz.io/application_type` annotation while rolling back
 - v1.0.2
