@@ -12,12 +12,6 @@ import (
 	"strings"
 )
 
-const (
-	ResourceGroup                   = "logz.io"
-	ResourceVersion                 = "v1alpha1"
-	ResourceInstrumentedApplication = "instrumentedapplications"
-)
-
 // InstrumentdApplicationData is the data structure for the custom resource
 // the response will contain a list of these fields
 // name: the name of the custom resource
@@ -64,9 +58,9 @@ func GetCustomResourcesHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	gvr := schema.GroupVersionResource{
-		Group:    ResourceGroup,
-		Version:  ResourceVersion,
-		Resource: ResourceInstrumentedApplication,
+		Group:    api.ResourceGroup,
+		Version:  api.ResourceVersion,
+		Resource: api.ResourceInstrumentedApplication,
 	}
 	// List all custom resources
 	instrumentedApplicationsList, err := dynamicClient.Resource(gvr).Namespace("").List(context.Background(), v1.ListOptions{})
