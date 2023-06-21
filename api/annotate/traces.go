@@ -95,8 +95,14 @@ func UpdateTracesResourceAnnotations(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Create a context with a timeout of 5 seconds
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	// Define timeout for the context
+	ctxDuration, err := api.GetTimeout()
+	if err != nil {
+		logger.Error(api.ErrorInvalidInput, err)
+		http.Error(w, api.ErrorInvalidInput+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), ctxDuration)
 	defer cancel()
 	var responses []TracesResourceResponse
 	for _, resource := range resources {
