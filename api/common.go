@@ -32,6 +32,8 @@ const (
 	ResourceGroup                   = "logz.io"
 	ResourceVersion                 = "v1alpha1"
 	ResourceInstrumentedApplication = "instrumentedapplications"
+
+	LogzioServiceAnnotationName = "logz.io/service-name"
 )
 
 var (
