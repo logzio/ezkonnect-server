@@ -19,6 +19,7 @@ import (
 // controller_kind: the kind of the controller that created the custom resource
 // container_name: the name of the container
 // traces_instrumented: whether the container is instrumented or not
+// traces_instrumentable: whether we can instrument the container or not
 // application: the name of the application that the container belongs to
 // language: the language of the application that the container belongs to
 // detection_status: the status of the detection process
@@ -29,6 +30,7 @@ type InstrumentdApplicationData struct {
 	ControllerKind             string  `json:"controller_kind"`
 	ContainerName              *string `json:"container_name"`
 	TracesInstrumented         bool    `json:"traces_instrumented"`
+	TracesInstrumentable       bool    `json:"traces_instrumentable"`
 	Application                *string `json:"application"`
 	Language                   *string `json:"language"`
 	DetectionStatus            string  `json:"detection_status"`
@@ -96,6 +98,7 @@ func GetCustomResourcesHandler(w http.ResponseWriter, r *http.Request) {
 					Namespace:                  namespace,
 					ControllerKind:             ControllerKind,
 					TracesInstrumented:         status["tracesInstrumented"].(bool),
+					TracesInstrumentable:       true,
 					ContainerName:              &containerNameStr,
 					Language:                   &langStr,
 					DetectionStatus:            status["instrumentationDetection"].(map[string]interface{})["phase"].(string),
@@ -118,6 +121,7 @@ func GetCustomResourcesHandler(w http.ResponseWriter, r *http.Request) {
 					Namespace:                  namespace,
 					ControllerKind:             ControllerKind,
 					TracesInstrumented:         status["tracesInstrumented"].(bool),
+					TracesInstrumentable:       false,
 					ContainerName:              &containerNameStr,
 					Application:                &applicationStr,
 					DetectionStatus:            status["instrumentationDetection"].(map[string]interface{})["phase"].(string),
@@ -135,6 +139,7 @@ func GetCustomResourcesHandler(w http.ResponseWriter, r *http.Request) {
 				Namespace:                  namespace,
 				ControllerKind:             ControllerKind,
 				TracesInstrumented:         status["tracesInstrumented"].(bool),
+				TracesInstrumentable:       false,
 				DetectionStatus:            status["instrumentationDetection"].(map[string]interface{})["phase"].(string),
 				LogType:                    &logType,
 				OpentelemetryPreconfigured: &otelDetectedBool,
