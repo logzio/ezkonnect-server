@@ -17,6 +17,7 @@ The response body will be a JSON array of objects, where each object contains th
 - `controller_kind` (string): The kind of the controller (lowercased owner reference kind).
 - `container_name` (string, optional): The container name associated with the instrumented application. Will be empty if both language and application fields are empty.
 - `traces_instrumented` (bool): Whether the application is instrumented or not.
+- `traces_instrumentable` (bool): Whether the application can be instrumented or not.
 - `application` (string, optional): The application name if available in the spec.
 - `language` (string, optional): The programming language if available in the spec.
 - `log_type` (string, optional): The log type if available in the spec.
@@ -40,6 +41,7 @@ Each instrumented application can have a `language` and/or an `application` fiel
         "controller_kind": "deployment",
         "container_name": "app-container",
         "traces_instrumented": true,
+        "traces_instrumentable": true,
         "application": null,
         "language": "python",
         "detection_status": "Completed",
@@ -52,6 +54,7 @@ Each instrumented application can have a `language` and/or an `application` fiel
         "controller_kind": "deployment",
         "container_name": "",
         "traces_instrumented": false,
+        "traces_instrumentable": false,
         "detection_status": "Completed",
         "opentelemetry_preconfigured": false,
         "log_type": "log"
@@ -62,6 +65,7 @@ Each instrumented application can have a `language` and/or an `application` fiel
         "controller_kind": "statefulset",
         "container_name": "app-container",
         "traces_instrumented": false,
+        "traces_instrumentable": false,
         "application": "my-app",
         "language": null,
         "detection_status": "Completed",
@@ -74,6 +78,7 @@ Each instrumented application can have a `language` and/or an `application` fiel
         "controller_kind": "deployment",
         "container_name": "app-container",
         "traces_instrumented": false,
+        "traces_instrumentable": true,
         "application": null,
         "language": "java",
         "detection_status": "Completed",

@@ -1,12 +1,20 @@
 package annotate
 
 import (
+	"context"
 	"encoding/json"
 	"github.com/logzio/ezkonnect-server/api"
+	"go.uber.org/zap"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/client-go/dynamic"
+	"k8s.io/client-go/dynamic/dynamicinformer"
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/tools/cache"
 	"net/http"
 	"strings"
+	"time"
 )
 
 const (
@@ -65,6 +73,19 @@ func UpdateTracesResourceAnnotations(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, api.ErrorKubeClient+err.Error(), http.StatusInternalServerError)
 		return
 	}
+	// Create a dynamic client
+	dynamicClient, err := dynamic.NewForConfig(config)
+	if err != nil {
+		logger.Error(api.ErrorDynamic, zap.Error(err))
+		http.Error(w, api.ErrorDynamic+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	gvr := schema.GroupVersionResource{
+		Group:    api.ResourceGroup,
+		Version:  api.ResourceVersion,
+		Resource: api.ResourceInstrumentedApplication,
+	}
 
 	// Validate input before updating resources to avoid changing resources and retuning an error
 	// if one of the requests is invalid, return an error
@@ -74,8 +95,36 @@ func UpdateTracesResourceAnnotations(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Define timeout for the context
+	ctxDuration, err := api.GetTimeout()
+	if err != nil {
+		logger.Error(api.ErrorInvalidInput, err)
+		http.Error(w, api.ErrorInvalidInput+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), ctxDuration)
+	defer cancel()
 	var responses []TracesResourceResponse
 	for _, resource := range resources {
+		// Create a channel to signal when a crd status is updated
+		updateCh := make(chan struct{})
+		// Create a dynamic factory that watches for changes in the InstrumentedApplication CRD corresponding to the resource
+		dynamicFactory := dynamicinformer.NewFilteredDynamicSharedInformerFactory(dynamicClient, 1*time.Second, resource.Namespace, func(options *v1.ListOptions) {
+			options.FieldSelector = "metadata.name=" + resource.Name
+		})
+		informer := dynamicFactory.ForResource(gvr)
+		// handle updates and compare the old and new status
+		informer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
+			UpdateFunc: func(oldObj, newObj interface{}) {
+				newStatus := newObj.(*unstructured.Unstructured).Object["status"].(map[string]interface{})
+				oldStatus := oldObj.(*unstructured.Unstructured).Object["status"].(map[string]interface{})
+				if !api.DeepEqualMap(oldStatus, newStatus) {
+					updateCh <- struct{}{} // Signal that the update occurred
+				}
+			},
+		})
+		// start watching for changes
+		dynamicFactory.Start(ctx.Done())
 		// choose the annotation key and value according to the telemetry type and action
 		actionValue := "true"
 		if resource.Action == api.ActionDelete {
@@ -95,7 +144,6 @@ func UpdateTracesResourceAnnotations(w http.ResponseWriter, r *http.Request) {
 			Kind:               resource.Kind,
 			UpdatedAnnotations: annotations,
 		}
-
 		switch resource.Kind {
 		case api.KindDeployment:
 			logger.Info("Updating deployment: ", resource.Name)
@@ -105,7 +153,7 @@ func UpdateTracesResourceAnnotations(w http.ResponseWriter, r *http.Request) {
 				http.Error(w, api.ErrorGet+err.Error(), http.StatusInternalServerError)
 				return
 			}
-
+			// Update the annotations
 			for k, v := range annotations {
 				if deployment.Spec.Template.ObjectMeta.Annotations == nil {
 					deployment.Spec.Template.ObjectMeta.Annotations = make(map[string]string)
@@ -119,7 +167,7 @@ func UpdateTracesResourceAnnotations(w http.ResponseWriter, r *http.Request) {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
-
+			// success add to responses
 			responses = append(responses, response)
 
 		case api.KindStatefulSet:
@@ -130,7 +178,7 @@ func UpdateTracesResourceAnnotations(w http.ResponseWriter, r *http.Request) {
 				http.Error(w, api.ErrorGet+err.Error(), http.StatusInternalServerError)
 				return
 			}
-
+			// Update the annotations
 			for k, v := range annotations {
 				if statefulSet.Spec.Template.ObjectMeta.Annotations == nil {
 					statefulSet.Spec.Template.ObjectMeta.Annotations = make(map[string]string)
@@ -144,11 +192,20 @@ func UpdateTracesResourceAnnotations(w http.ResponseWriter, r *http.Request) {
 				http.Error(w, api.ErrorUpdate+err.Error(), http.StatusInternalServerError)
 				return
 			}
-
+			// success add to responses
 			responses = append(responses, response)
 		}
-	}
+		// Wait for the update to occur or timeout
+		select {
+		case <-updateCh:
+			logger.Info("crd instrumentation status changed: ", resource.Name)
 
+		case <-ctx.Done():
+			logger.Error(api.ErrorTimeout + resource.Name)
+			http.Error(w, api.ErrorTimeout+resource.Name, http.StatusInternalServerError)
+			return
+		}
+	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(responses)
